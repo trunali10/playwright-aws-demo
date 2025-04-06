@@ -2,16 +2,31 @@ version: 0.2
 
 phases:
   install:
+    runtime-versions:
+      nodejs: 18
     commands:
-      - echo "Logging in to ECR..."
-      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 905418471145.dkr.ecr.ap-south-1.amazonaws.com
+      - echo "Installing dependencies..."
+      - npm ci
+      - npx playwright install --with-deps
+
   build:
     commands:
+      - echo "Running Playwright tests..."
+      - npx playwright test --reporter=html
       - echo "Building Docker image..."
       - docker build -t playwright-aws-demo .
       - docker tag playwright-aws-demo:latest 905418471145.dkr.ecr.ap-south-1.amazonaws.com/playwright-aws-demo:latest
 
   post_build:
     commands:
+      - echo "Logging in to ECR..."
+      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 905418471145.dkr.ecr.ap-south-1.amazonaws.com
       - echo "Pushing image to ECR..."
       - docker push 905418471145.dkr.ecr.ap-south-1.amazonaws.com/playwright-aws-demo:latest
+      - echo "Listing report files..."
+      - ls -l playwright-report
+
+artifacts:
+  files:
+    - '**/*'
+  base-directory: playwright-report

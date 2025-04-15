@@ -8,11 +8,7 @@ on:
 
 jobs:
   build-with-codebuild:
-    runs-on:
-      - self-hosted
-      - linux
-      - codebuild
-      - buildspec-override:true  # 👈 Ensures buildspec.yml runs
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout source code
@@ -26,3 +22,4 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 30
+
